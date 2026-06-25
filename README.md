@@ -6,7 +6,7 @@ This enhanced version allows you to set a dynamic quota (via a Home Assistant en
 
 <!-- Add a screenshot here -->
 
-<!-- ![Qustodio Apps Card](images/screenshot.png) -->
+<!-- ![Qustodio Apps Card](images/preview.png) -->
 
 ## Features
 
