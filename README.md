@@ -47,3 +47,5 @@ type: custom:qustodio-apps-card
 entity: sensor.YOURCHILDNAME
 quota_entity: input_number.YOURCHILDNAME_temps_bonus_qustodio
 name: "YOURCHILDNAME's Screen Time"
+
+
