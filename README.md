@@ -4,9 +4,7 @@ A custom Lovelace card for **Home Assistant** designed to track your children's 
 
 This enhanced version allows you to set a dynamic quota (via a Home Assistant entity) and features built-in action buttons to grant extra bonus time with a single click.
 
-<!-- Add a screenshot here -->
-
-<!-- ![Qustodio Apps Card](images/preview.png) -->
+![Qustodio Apps Card Preview](preview.png)
 
 ## Features
 
