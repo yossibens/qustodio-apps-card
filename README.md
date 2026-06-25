@@ -48,4 +48,53 @@ entity: sensor.YOURCHILDNAME
 quota_entity: input_number.YOURCHILDNAME_temps_bonus_qustodio
 name: "YOURCHILDNAME's Screen Time"
 
+---
 
+## Configuration Options
+
+| Parameter      | Type   | Required | Description |
+|---------------|--------|----------|-------------|
+| `type` | String | ✅ Yes | Must be `custom:qustodio-apps-card` |
+| `entity` | String | ✅ Yes | The Qustodio sensor entity for the child (e.g. `sensor.aron`) |
+| `quota_entity` | String | ❌ No | An `input_number` entity containing the total quota in minutes (managed by your automations). If omitted, the card defaults to the native Qustodio quota. |
+| `name` | String | ❌ No | Custom title displayed at the top of the card. |
+
+---
+
+## Script Requirements for Action Buttons
+
+For the **15 min**, **30 min**, and **60 min** buttons to work, you must create a Home Assistant script named exactly:
+
+```yaml
+script.qustodio_add_extra_time_bonus
+```
+
+This script must accept the following variables:
+
+| Variable | Description | Example |
+|-----------|-------------|---------|
+| `enfant` | Receives the extracted child name from the entity | `aron` |
+| `minutes` | Number of minutes to add | `15`, `30`, or `60` |
+
+### Example Script
+
+```yaml
+qustodio_add_extra_time_bonus:
+  alias: "Qustodio - Add Extra Time Bonus"
+  fields:
+    enfant:
+      description: "The name of the child"
+      example: "julien"
+
+    minutes:
+      description: "Minutes to add"
+      example: 15
+
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: "input_number.{{ enfant }}_temps_bonus_qustodio"
+      data:
+        value: >
+          {{ states('input_number.' ~ enfant ~ '_temps_bonus_qustodio') | float + minutes }}
+```
