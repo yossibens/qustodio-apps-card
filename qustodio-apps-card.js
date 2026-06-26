@@ -79,7 +79,9 @@ class QustodioAppsCard extends HTMLElement {
         remaining: "Restant",
         addTime: "Ajouter du temps :",
         noApps: "Aucune application utilisée aujourd'hui",
-        min: "min"
+        min: "min",
+        h30: "1h30",
+        h00: "2h00"
       },
       en: {
         quota: "Quota",
@@ -87,7 +89,29 @@ class QustodioAppsCard extends HTMLElement {
         remaining: "Remaining",
         addTime: "Add extra time:",
         noApps: "No applications used today",
-        min: "min"
+        min: "min",
+        h30: "1h 30m",
+        h00: "2h 00m"
+      },
+      es: {
+        quota: "Cuota",
+        used: "Usado",
+        remaining: "Restante",
+        addTime: "Añadir tiempo:",
+        noApps: "No se usaron aplicaciones hoy",
+        min: "min",
+        h30: "1h 30m",
+        h00: "2h 00m"
+      },
+      de: {
+        quota: "Kontingent",
+        used: "Genutzt",
+        remaining: "Verbleibend",
+        addTime: "Zeit hinzufügen:",
+        noApps: "Heute keine Apps genutzt",
+        min: "Min.",
+        h30: "1 Std. 30 Min.",
+        h00: "2 Std. 00 Min."
       }
     };
 
@@ -140,8 +164,8 @@ class QustodioAppsCard extends HTMLElement {
           <option value="40">40 ${t.min}</option>
           <option value="50">50 ${t.min}</option>
           <option value="60">60 ${t.min}</option>
-          <option value="90">${lang === 'fr' ? '1h30' : '1h 30m'}</option>
-          <option value="120">${lang === 'fr' ? '2h00' : '2h 00m'}</option>
+          <option value="90">${t.h30}</option>
+          <option value="120">${t.h00}</option>
         </select>
 
         <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
