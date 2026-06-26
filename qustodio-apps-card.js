@@ -102,17 +102,27 @@ class QustodioAppsCard extends HTMLElement {
         }).join('')
       : `<p style="text-align:center;color:#888">Aucune application utilisée aujourd'hui</p>`;
 
-    // ================= BUTTONS =================
-    const buttons = [10,20,30,40,50,60]
-      .map(m => `
-        <button class="bonus-btn" data-minutes="${m}"
-          style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card-background-color);border:2px dotted var(--primary-color);border-radius:10px;padding:10px;cursor:pointer;">
-          <ha-icon icon="mdi:plus-circle-outline"
-            style="color:var(--primary-color);--mdc-icon-size:28px;">
-          </ha-icon>
-          <span style="font-size:12px;color:var(--primary-color)">${m} min</span>
+    // ================= NOUVELLE ZONE COMPACTE : SÉLECTEUR + BOUTON =================
+    const actionZoneHtml = `
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;background:var(--card-background-color);padding:8px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.03)">
+        <span style="font-size:13px;font-weight:500;color:var(--secondary-text-color);flex:1">Ajouter du temps :</span>
+        
+        <select id="time-selector" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);background:var(--paper-card-background-color, #fff);color:var(--primary-text-color);font-size:13px;font-weight:600;outline:none;cursor:pointer;">
+          <option value="10">10 min</option>
+          <option value="20">20 min</option>
+          <option value="30" selected>30 min</option>
+          <option value="40">40 min</option>
+          <option value="50">50 min</option>
+          <option value="60">60 min</option>
+          <option value="90">1h30</option>
+          <option value="120">2h00</option>
+        </select>
+
+        <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
+          <ha-icon icon="mdi:check-circle-outline" style="color:white;--mdc-icon-size:20px;"></ha-icon>
         </button>
-      `).join('');
+      </div>
+    `;
 
     this.innerHTML = `
       <ha-card>
@@ -149,23 +159,21 @@ class QustodioAppsCard extends HTMLElement {
             <div style="height:100%;width:${pct}%;background:${pctColor};border-radius:8px"></div>
           </div>
 
-          <div class="bonus-buttons" style="display:flex;gap:8px;margin-bottom:16px">
-            ${buttons}
-          </div>
+          ${actionZoneHtml}
 
           ${appsHtml}
         </div>
       </ha-card>
     `;
 
-    const container = this.querySelector('.bonus-buttons');
-
-    container.onclick = (e) => {
-      const btn = e.target.closest('.bonus-btn');
-      if (!btn) return;
-
-      this._addTime(childName, btn.dataset.minutes);
-    };
+    // Écouteur d'événement sur le bouton de validation unique
+    const validateBtn = this.querySelector('#btn-validate');
+    if (validateBtn) {
+      validateBtn.onclick = () => {
+        const selectedMinutes = this.querySelector('#time-selector').value;
+        this._addTime(childName, selectedMinutes);
+      };
+    }
   }
 
   getCardSize() { return 5; }
