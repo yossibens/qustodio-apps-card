@@ -18,7 +18,8 @@ class QustodioAppsCard extends HTMLElement {
       state: entity.state,
       used: entity.attributes.time_used_minutes,
       top: entity.attributes.top_app,
-      quota: quotaEntity?.state
+      quota: quotaEntity?.state,
+      language: hass.language // Ajouté à la clé pour recharger si l'utilisateur change de langue
     });
 
     if (this._key === key) return;
@@ -67,6 +68,31 @@ class QustodioAppsCard extends HTMLElement {
     const topApp = entity.attributes.top_app || '';
     const name = this.config.name || entity.attributes.friendly_name || 'Apps';
 
+    // ================= TRADUCTIONS =================
+    // Détection de la langue de Home Assistant (par défaut 'en' si ce n'est pas 'fr')
+    const lang = (this._hass.language && this._hass.language.startsWith('fr')) ? 'fr' : 'en';
+
+    const translations = {
+      fr: {
+        quota: "Quota",
+        used: "Utilisé",
+        remaining: "Restant",
+        addTime: "Ajouter du temps :",
+        noApps: "Aucune application utilisée aujourd'hui",
+        min: "min"
+      },
+      en: {
+        quota: "Quota",
+        used: "Used",
+        remaining: "Remaining",
+        addTime: "Add extra time:",
+        noApps: "No applications used today",
+        min: "min"
+      }
+    };
+
+    const t = translations[lang];
+
     // ================= APPS =================
     const appsHtml = apps.length
       ? apps.map(app => {
@@ -89,7 +115,7 @@ class QustodioAppsCard extends HTMLElement {
                     ${app.name}
                   </span>
                   <span style="font-size:12px;color:#666;font-weight:${isTop ? 600 : 400}">
-                    ${app.minutes} min
+                    ${app.minutes} ${t.min}
                   </span>
                 </div>
 
@@ -100,22 +126,22 @@ class QustodioAppsCard extends HTMLElement {
             </div>
           `;
         }).join('')
-      : `<p style="text-align:center;color:#888">Aucune application utilisée aujourd'hui</p>`;
+      : `<p style="text-align:center;color:#888">${t.noApps}</p>`;
 
-    // ================= NOUVELLE ZONE COMPACTE : SÉLECTEUR + BOUTON =================
+    // ================= SÉLECTEUR + BOUTON =================
     const actionZoneHtml = `
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;background:var(--card-background-color);padding:8px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.03)">
-        <span style="font-size:13px;font-weight:500;color:var(--secondary-text-color);flex:1">Ajouter du temps :</span>
+        <span style="font-size:13px;font-weight:500;color:var(--secondary-text-color);flex:1">${t.addTime}</span>
         
         <select id="time-selector" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);background:var(--paper-card-background-color, #fff);color:var(--primary-text-color);font-size:13px;font-weight:600;outline:none;cursor:pointer;">
-          <option value="10">10 min</option>
-          <option value="20">20 min</option>
-          <option value="30" selected>30 min</option>
-          <option value="40">40 min</option>
-          <option value="50">50 min</option>
-          <option value="60">60 min</option>
-          <option value="90">1h30</option>
-          <option value="120">2h00</option>
+          <option value="10">10 ${t.min}</option>
+          <option value="20">20 ${t.min}</option>
+          <option value="30" selected>30 ${t.min}</option>
+          <option value="40">40 ${t.min}</option>
+          <option value="50">50 ${t.min}</option>
+          <option value="60">60 ${t.min}</option>
+          <option value="90">${lang === 'fr' ? '1h30' : '1h 30m'}</option>
+          <option value="120">${lang === 'fr' ? '2h00' : '2h 00m'}</option>
         </select>
 
         <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
@@ -134,23 +160,23 @@ class QustodioAppsCard extends HTMLElement {
 
           <div style="display:flex;gap:8px;margin-bottom:14px">
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:11px;color:#888">Quota</div>
+              <div style="font-size:11px;color:#888">${t.quota}</div>
               <div style="font-size:20px;font-weight:600;color:#1D9E75">
-                ${Math.round(quota)} min
+                ${Math.round(quota)} ${t.min}
               </div>
             </div>
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:11px;color:#888">Utilisé</div>
+              <div style="font-size:11px;color:#888">${t.used}</div>
               <div style="font-size:20px;font-weight:600;color:#333">
-                ${Math.round(timeUsed)} min
+                ${Math.round(timeUsed)} ${t.min}
               </div>
             </div>
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:11px;color:#888">Restant</div>
+              <div style="font-size:11px;color:#888">${t.remaining}</div>
               <div style="font-size:20px;font-weight:600;color:#E24B4A">
-                ${Math.round(remaining)} min
+                ${Math.round(remaining)} ${t.min}
               </div>
             </div>
           </div>
@@ -166,7 +192,6 @@ class QustodioAppsCard extends HTMLElement {
       </ha-card>
     `;
 
-    // Écouteur d'événement sur le bouton de validation unique
     const validateBtn = this.querySelector('#btn-validate');
     if (validateBtn) {
       validateBtn.onclick = () => {
