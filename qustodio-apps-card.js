@@ -132,7 +132,7 @@ class QustodioAppsCard extends HTMLElement {
                   <span style="font-size:13px;font-weight:${isTop ? 600 : 400}">
                     ${app.name}
                   </span>
-                  <span style="font-size:12px;color:#666;font-weight:${isTop ? 600 : 400}">
+                  <span style="font-size:12px;color:#888;font-weight:${isTop ? 600 : 400}">
                     ${app.minutes} ${t.min}
                   </span>
                 </div>
