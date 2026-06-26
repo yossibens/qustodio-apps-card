@@ -199,7 +199,7 @@ class QustodioAppsCard extends HTMLElement {
             </select>
 
             <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
-              <ha-icon icon="mdi:check-circle-outline" style="color:white;--mdc-icon-size:20px;"></ha-icon>
+              <ha-icon icon="mdi:plus" style="color:white;--mdc-icon-size:20px;"></ha-icon>
             </button>
           </div>
 
