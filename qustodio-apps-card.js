@@ -164,7 +164,7 @@ class QustodioAppsCard extends HTMLElement {
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
               <div style="font-size:11px;color:#888">${t.used}</div>
-              <div style="font-size:20px;font-weight:600;color:#333">
+              <div style="font-size:20px;font-weight:600;color:#888">
                 ${Math.round(timeUsed)} ${t.min}
               </div>
             </div>
