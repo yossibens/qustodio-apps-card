@@ -14,13 +14,8 @@ class QustodioAppsCard extends HTMLElement {
 
     if (!entity) return;
 
-    const key = JSON.stringify({
-      state: entity.state,
-      used: entity.attributes.time_used_minutes,
-      top: entity.attributes.top_app,
-      quota: quotaEntity?.state,
-      language: hass.language // Ajouté à la clé pour recharger si l'utilisateur change de langue
-    });
+    // Clé optimisée par chaîne de caractères avec conservation de la langue (sécurité reconnexions HA)
+    const key = `${entity.state}_${entity.attributes.time_used_minutes}_${entity.attributes.top_app}_${quotaEntity?.state || ''}_${hass.language}`;
 
     if (this._key === key) return;
     this._key = key;
@@ -69,10 +64,14 @@ class QustodioAppsCard extends HTMLElement {
     const name = this.config.name || entity.attributes.friendly_name || 'Apps';
 
     // ================= TRADUCTIONS =================
-    // Détection de la langue de Home Assistant (par défaut 'en' si ce n'est pas 'fr')
-    const lang = (this._hass.language && this._hass.language.startsWith('fr')) ? 'fr' : 'en';
+    let lang = 'en';
+    if (this._hass?.language) {
+      if (this._hass.language.startsWith('fr')) lang = 'fr';
+      else if (this._hass.language.startsWith('es')) lang = 'es';
+      else if (this._hass.language.startsWith('de')) lang = 'de';
+    }
 
-    const translations = {
+    const t = {
       fr: {
         quota: "Quota",
         used: "Utilisé",
@@ -90,8 +89,8 @@ class QustodioAppsCard extends HTMLElement {
         addTime: "Add extra time:",
         noApps: "No applications used today",
         min: "min",
-        h30: "1h 30m",
-        h00: "2h 00m"
+        h30: "1h30",
+        h00: "2h00"
       },
       es: {
         quota: "Cuota",
@@ -100,42 +99,40 @@ class QustodioAppsCard extends HTMLElement {
         addTime: "Añadir tiempo:",
         noApps: "No se usaron aplicaciones hoy",
         min: "min",
-        h30: "1h 30m",
-        h00: "2h 00m"
+        h30: "1h30",
+        h00: "2h00"
       },
       de: {
         quota: "Kontingent",
         used: "Genutzt",
         remaining: "Verbleibend",
         addTime: "Zeit hinzufügen:",
-        noApps: "Heute keine Apps genutzt",
-        min: "Min.",
-        h30: "1 Std. 30 Min.",
-        h00: "2 Std. 00 Min."
+        noApps: "Heute aucune application utilisée",
+        min: "Min",
+        h30: "1h30",
+        h00: "2h00"
       }
-    };
+    }[lang];
 
-    const t = translations[lang];
-
-    // ================= APPS =================
     const appsHtml = apps.length
       ? apps.map(app => {
           const hasThumb = !!app.thumbnail;
-
           const isTop = app.name === topApp;
           const barW = timeUsed ? Math.round(app.minutes / timeUsed * 100) : 0;
+
+          // FIX POINT 2 & 3 : On injecte l'un OU l'autre directement en JS, jamais les deux en même temps dans le DOM
+          const mediaHtml = hasThumb 
+            ? `<img src="${app.thumbnail}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
+            : `<div style="width:32px;height:32px;border-radius:8px;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📱</div>`;
 
           return `
             <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)">
               
-              <img src="${app.thumbnail || ''}"
-                style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;${hasThumb ? '' : 'display:none'}">
-
-              <div style="width:32px;height:32px;border-radius:8px;background:#e0e0e0;display:${hasThumb ? 'none' : 'flex'};align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📱</div>
+              ${mediaHtml}
 
               <div style="flex:1;min-width:0">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                  <span style="font-size:13px;font-weight:${isTop ? 600 : 400};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px">
+                  <span style="font-size:13px;font-weight:${isTop ? 600 : 400}">
                     ${app.name}
                   </span>
                   <span style="font-size:12px;color:#666;font-weight:${isTop ? 600 : 400}">
@@ -144,35 +141,13 @@ class QustodioAppsCard extends HTMLElement {
                 </div>
 
                 <div style="height:4px;border-radius:2px;background:var(--card-background-color);overflow:hidden">
-                  <div style="height:100%;width:${barW}%;background:${isTop ? 'var(--primary-color)' : 'var(--info-color)'};border-radius:2px"></div>
+                  <div style="height:100%;width:${barW}%;background:${isTop ? 'var(--primary-color)' : 'var(--info-color)'}"></div>
                 </div>
               </div>
             </div>
           `;
         }).join('')
       : `<p style="text-align:center;color:#888">${t.noApps}</p>`;
-
-    // ================= SÉLECTEUR + BOUTON =================
-    const actionZoneHtml = `
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;background:var(--card-background-color);padding:8px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.03)">
-        <span style="font-size:13px;font-weight:500;color:var(--secondary-text-color);flex:1">${t.addTime}</span>
-        
-        <select id="time-selector" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);background:var(--paper-card-background-color, #fff);color:var(--primary-text-color);font-size:13px;font-weight:600;outline:none;cursor:pointer;">
-          <option value="10">10 ${t.min}</option>
-          <option value="20">20 ${t.min}</option>
-          <option value="30" selected>30 ${t.min}</option>
-          <option value="40">40 ${t.min}</option>
-          <option value="50">50 ${t.min}</option>
-          <option value="60">60 ${t.min}</option>
-          <option value="90">${t.h30}</option>
-          <option value="120">${t.h00}</option>
-        </select>
-
-        <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
-          <ha-icon icon="mdi:check-circle-outline" style="color:white;--mdc-icon-size:20px;"></ha-icon>
-        </button>
-      </div>
-    `;
 
     this.innerHTML = `
       <ha-card>
@@ -209,18 +184,36 @@ class QustodioAppsCard extends HTMLElement {
             <div style="height:100%;width:${pct}%;background:${pctColor};border-radius:8px"></div>
           </div>
 
-          ${actionZoneHtml}
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;background:var(--card-background-color);padding:8px 12px;border-radius:10px">
+            <span style="font-size:13px;font-weight:500;flex:1">${t.addTime}</span>
+            
+            <select id="time-selector" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);background:var(--paper-card-background-color,#fff);color:var(--primary-text-color);font-size:13px;font-weight:600;outline:none;cursor:pointer;">
+              <option value="10">10 ${t.min}</option>
+              <option value="20">20 ${t.min}</option>
+              <option value="30" selected>30 ${t.min}</option>
+              <option value="40">40 ${t.min}</option>
+              <option value="50">50 ${t.min}</option>
+              <option value="60">60 ${t.min}</option>
+              <option value="90">${t.h30}</option>
+              <option value="120">${t.h00}</option>
+            </select>
+
+            <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
+              <ha-icon icon="mdi:check-circle-outline" style="color:white;--mdc-icon-size:20px;"></ha-icon>
+            </button>
+          </div>
 
           ${appsHtml}
         </div>
       </ha-card>
     `;
 
-    const validateBtn = this.querySelector('#btn-validate');
-    if (validateBtn) {
-      validateBtn.onclick = () => {
-        const selectedMinutes = this.querySelector('#time-selector').value;
-        this._addTime(childName, selectedMinutes);
+    const select = this.querySelector('#time-selector');
+    const btn = this.querySelector('#btn-validate');
+
+    if (btn && select) {
+      btn.onclick = () => {
+        this._addTime(childName, select.value);
       };
     }
   }
