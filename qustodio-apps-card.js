@@ -120,16 +120,13 @@ class QustodioAppsCard extends HTMLElement {
           const isTop = app.name === topApp;
           const barW = timeUsed ? Math.round(app.minutes / timeUsed * 100) : 0;
 
-          // FIX POINT 2 & 3 : On injecte l'un OU l'autre directement en JS, jamais les deux en même temps dans le DOM
           const mediaHtml = hasThumb 
             ? `<img src="${app.thumbnail}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
             : `<div style="width:32px;height:32px;border-radius:8px;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📱</div>`;
 
           return `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)">
-              
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
               ${mediaHtml}
-
               <div style="flex:1;min-width:0">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
                   <span style="font-size:13px;font-weight:${isTop ? 600 : 400}">
