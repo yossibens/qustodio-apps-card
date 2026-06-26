@@ -156,21 +156,21 @@ class QustodioAppsCard extends HTMLElement {
 
           <div style="display:flex;gap:8px;margin-bottom:14px">
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:11px;color:#888">${t.quota}</div>
+              <div style="font-size:14px;color:#888">${t.quota}</div>
               <div style="font-size:20px;font-weight:600;color:#1D9E75">
                 ${Math.round(quota)} ${t.min}
               </div>
             </div>
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:11px;color:#888">${t.used}</div>
+              <div style="font-size:14px;color:#888">${t.used}</div>
               <div style="font-size:20px;font-weight:600;color:#888">
                 ${Math.round(timeUsed)} ${t.min}
               </div>
             </div>
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:11px;color:#888">${t.remaining}</div>
+              <div style="font-size:14px;color:#888">${t.remaining}</div>
               <div style="font-size:20px;font-weight:600;color:#E24B4A">
                 ${Math.round(remaining)} ${t.min}
               </div>
